@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#4A148C">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Articles · a / an / the / —</title>
+<style>
+:root{--p:#4A148C;--s:#2e7d32;--e:#c62828;--bg:#f6f3fa;--c:#fff;--t:#1a1a1a;--m:#666;--b:#ddd5e8}
+[data-theme=dark]{--p:#CE93D8;--s:#66bb6a;--e:#ef5350;--bg:#141018;--c:#1e1824;--t:#ece8f0;--m:#a89ab0;--b:#3a3048}
+*{box-sizing:border-box;margin:0;padding:0}
+button,input{font-family:inherit;color:inherit}
+button{cursor:pointer;-webkit-tap-highlight-color:transparent}
+body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--t);line-height:1.45;padding-bottom:60px}
+header{background:linear-gradient(135deg,#4A148C,#7B1FA2);color:#fff;padding:14px 12px 10px;text-align:center;position:sticky;top:0;z-index:20;box-shadow:0 2px 10px rgba(0,0,0,.25)}
+header h1{font-size:1.2rem}header p{opacity:.9;font-size:.78rem;margin-top:2px}
+.tools{margin-top:7px}.tools button{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.35);color:#fff;padding:5px 11px;border-radius:16px;font-size:.72rem;font-weight:600;margin:0 2px}
+.tabs{display:flex;flex-wrap:wrap;gap:5px;padding:9px 6px;justify-content:center}
+.tab{padding:7px 10px;border:2px solid var(--b);border-radius:18px;background:var(--c);font-size:.74rem;font-weight:600;color:var(--p)}
+.tab.active{background:var(--p);color:#fff;border-color:var(--p)}
+.sec{display:none;max-width:720px;margin:0 auto;padding:8px 11px 20px}.sec.active{display:block}
+.card{background:var(--c);border-radius:12px;padding:13px;margin-bottom:11px;border:1px solid var(--b)}
+.card h2{font-size:.98rem;color:var(--p);margin-bottom:6px}
+.rule{padding:10px;border-radius:8px;margin-bottom:7px;border-left:5px solid;font-size:.85rem;background:var(--bg)}
+.rule b{display:block;margin-bottom:2px}.ex{font-style:italic;color:var(--m);font-size:.78rem;margin-top:3px}
+.q{font-weight:600;margin-bottom:6px;font-size:.9rem}
+.opts{display:flex;flex-direction:column;gap:5px}
+.opt{padding:10px 11px;border:2px solid var(--b);border-radius:8px;background:var(--c);text-align:left;font-size:.86rem}
+.opt.ok{border-color:var(--s);background:rgba(46,125,50,.12);color:var(--s)}
+.opt.bad{border-color:var(--e);background:rgba(198,40,40,.12);color:var(--e)}
+.opt.dis{pointer-events:none}
+.fb{font-size:.78rem;margin-top:4px;min-height:1.1em}.fb.ok{color:var(--s)}.fb.bad{color:var(--e)}
+.btn{padding:9px 14px;border:none;border-radius:8px;background:var(--p);color:#fff;font-weight:600;font-size:.86rem;margin:3px 2px}
+.btn.sec{background:var(--c);color:var(--p);border:2px solid var(--b)}
+.score{text-align:center;font-weight:700;font-size:1.05rem;margin:8px 0}
+.gap input,.cloze input{padding:8px;border:2px solid var(--b);border-radius:7px;text-align:center;font-weight:600;background:var(--c)}
+.gap input{width:72px}.cloze input{width:64px;padding:5px 6px}
+.gap input.ok,.cloze input.ok{border-color:var(--s)}.gap input.bad,.cloze input.bad{border-color:var(--e)}
+.hint{font-size:.76rem;color:var(--m);margin-bottom:9px}
+label{display:block;font-size:.85rem;font-weight:600;margin-bottom:4px}
+input[type=text]#stuName,input[type=text]#webhookUrl{width:100%;padding:10px;border:2px solid var(--b);border-radius:8px;background:var(--c);font-size:1rem;margin-bottom:8px}
+.cloze p{font-size:.9rem;line-height:1.9;margin-bottom:8px}
+.hidden{display:none}
+table{width:100%;border-collapse:collapse;font-size:.8rem}
+td,th{border:1px solid var(--b);padding:6px;text-align:left}th{background:var(--bg)}
+.send-ok{color:var(--s);font-size:.8rem}.send-err{color:var(--e);font-size:.8rem}
+</style>
+</head>
+<body>
+<header>
+  <h1>Articles · a / an / the / —</h1>
+  <p>Практика + сохранение результатов</p>
+  <div class="tools">
+    <button type="button" onclick="(function(d){d.setAttribute('data-theme',d.getAttribute('data-theme')==='dark'?'':'dark')})(document.documentElement)">🌓 Тема</button>
+    <button type="button" onclick="showTeacher()">👩‍🏫 Кабинет</button>
+  </div>
+</header>
+
+<div id="mainApp">
+<div style="max-width:720px;margin:8px auto;padding:0 11px">
+  <div class="card" style="padding:12px">
+    <label>Имя и фамилия (для сохранения результата)</label>
+    <input type="text" id="stuName" placeholder="Иван Иванов" autocomplete="name">
+    <p class="hint">После «Проверить» результат сохраняется в этом браузере и отправляется в облако (если настроен webhook).</p>
+    <div style="font-size:.82rem"><b>Прогресс:</b> <span id="progSummary">ещё нет попыток</span></div>
+  </div>
+</div>
+
+<div class="tabs">
+  <button class="tab active" data-t="rules" onclick="go('rules')">📖 Правила</button>
+  <button class="tab" data-t="choice" onclick="go('choice')">✅ Выбор</button>
+  <button class="tab" data-t="fill" onclick="go('fill')">✏️ Пропуски</button>
+  <button class="tab" data-t="fix" onclick="go('fix')">🔍 Ошибки</button>
+  <button class="tab" data-t="cloze" onclick="go('cloze')">📝 Текст</button>
+  <button class="tab" data-t="mix" onclick="go('mix')">🔀 Микс</button>
+</div>
+
+<section class="sec active" id="rules">
+  <div class="card">
+    <h2>1. a / an</h2>
+    <div class="rule" style="border-color:#7B1FA2"><b>a</b> — согласный <i>звук</i><div class="ex">a book · a university (/j/) · a European city</div></div>
+    <div class="rule" style="border-color:#7B1FA2"><b>an</b> — гласный <i>звук</i><div class="ex">an apple · an hour · an MBA · an honest man</div></div>
+  </div>
+  <div class="card">
+    <h2>2. the</h2>
+    <div class="rule" style="border-color:#1565C0"><b>Уникально / уже знаем</b><div class="ex">the sun · I saw a dog. The dog was black.</div></div>
+    <div class="rule" style="border-color:#1565C0"><b>Превосходная / порядковые</b><div class="ex">the best · the first · the only way</div></div>
+    <div class="rule" style="border-color:#1565C0"><b>География / инструменты</b><div class="ex">the USA · the Alps · the Nile · play the guitar</div></div>
+  </div>
+  <div class="card">
+    <h2>3. Zero (—)</h2>
+    <div class="rule" style="border-color:#2e7d32"><b>Общее, языки, спорт, еда, школа/работа/дом</b><div class="ex">Life is short. · speak Spanish · play football · go to school · at home</div></div>
+  </div>
+  <div class="card">
+    <h2>4. Ловушки</h2>
+    <div class="rule" style="border-color:#c62828"><b>hospital / school / prison</b><div class="ex">in hospital (пациент) vs in the hospital (гость)</div></div>
+    <div class="rule" style="border-color:#c62828"><b>Звук ≠ буква</b><div class="ex">a university · an hour</div></div>
+  </div>
+</section>
+
+<section class="sec" id="choice">
+  <div class="card">
+    <h2>Выбери артикль</h2>
+    <p class="hint">Ответы перемешаны.</p>
+    <div id="choiceBox"></div>
+    <div class="score" id="choiceScore"></div>
+    <p id="choiceSend" class="hint"></p>
+    <button class="btn" onclick="checkChoice()">Проверить и сохранить</button>
+    <button class="btn sec" onclick="resetChoice()">Заново</button>
+  </div>
+</section>
+
+<section class="sec" id="fill">
+  <div class="card">
+    <h2>Вставь a / an / the или —</h2>
+    <p class="hint">Без артикля: <b>—</b> или <b>-</b></p>
+    <div id="fillBox"></div>
+    <div class="score" id="fillScore"></div>
+    <p id="fillSend" class="hint"></p>
+    <button class="btn" onclick="checkFill()">Проверить и сохранить</button>
+    <button class="btn sec" onclick="resetFill()">Заново</button>
+  </div>
+</section>
+
+<section class="sec" id="fix">
+  <div class="card">
+    <h2>Найди правильный вариант</h2>
+    <div id="fixBox"></div>
+    <div class="score" id="fixScore"></div>
+    <p id="fixSend" class="hint"></p>
+    <button class="btn" onclick="checkFix()">Проверить и сохранить</button>
+    <button class="btn sec" onclick="resetFix()">Заново</button>
+  </div>
+</section>
+
+<section class="sec" id="cloze">
+  <div class="card">
+    <h2>Текст с пропусками</h2>
+    <p class="hint">a / an / the / —</p>
+    <div class="cloze" id="clozeBox"></div>
+    <div class="score" id="clozeScore"></div>
+    <p id="clozeSend" class="hint"></p>
+    <button class="btn" onclick="checkCloze()">Проверить и сохранить</button>
+    <button class="btn sec" onclick="resetCloze()">Заново</button>
+  </div>
+</section>
+
+<section class="sec" id="mix">
+  <div class="card">
+    <h2>Микс · сложнее</h2>
+    <div id="mixBox"></div>
+    <div class="score" id="mixScore"></div>
+    <p id="mixSend" class="hint"></p>
+    <button class="btn" onclick="checkMix()">Проверить и сохранить</button>
+    <button class="btn sec" onclick="resetMix()">Заново</button>
+  </div>
+</section>
+</div>
+
+<div id="teacherScreen" class="hidden" style="max-width:720px;margin:0 auto;padding:12px">
+  <div class="card">
+    <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;margin-bottom:10px">
+      <h2 style="margin:0">Кабинет преподавателя</h2>
+      <button type="button" class="btn" onclick="hideTeacher()" style="margin:0">← К упражнениям</button>
+    </div>
+    <p class="hint">Только для тебя. Вход по паролю. Сдачи в этом браузере + webhook → Google Sheet.</p>
+    <label>Webhook URL (Google Apps Script /exec)</label>
+    <input type="text" id="webhookUrl" placeholder="https://script.google.com/macros/s/.../exec">
+    <button type="button" class="btn" onclick="saveWebhook()">Сохранить webhook</button>
+    <p class="hint" id="webhookStatus"></p>
+    <div style="margin:12px 0;padding-top:10px;border-top:1px solid var(--b)">
+      <label>Сменить пароль кабинета</label>
+      <input type="password" id="newPin" placeholder="Новый пароль" autocomplete="new-password" style="width:100%;padding:10px;border:2px solid var(--b);border-radius:8px;background:var(--c);margin-bottom:6px">
+      <button type="button" class="btn sec" onclick="changePin()">Сохранить пароль</button>
+      <p class="hint" id="pinStatus"></p>
+    </div>
+    <div id="teacherList" style="margin-top:12px"></div>
+    <button type="button" class="btn sec" onclick="exportAllJSON()">⬇ Все JSON</button>
+    <button type="button" class="btn sec" onclick="clearAll()">🗑 Очистить локальные</button>
+    <button type="button" class="btn" onclick="hideTeacher()" style="display:block;width:100%;margin-top:12px">← К упражнениям</button>
+  </div>
+</div>
+
+<script>
+const STORE='articles_practice_submissions_v1';
+const WEBHOOK_KEY='articles_practice_webhook';
+const PIN_KEY='articles_practice_teacher_pin';
+const DEFAULT_PIN='teacher'; // смени в кабинете после первого входа
+
+function getPin(){
+  return (localStorage.getItem(PIN_KEY)||DEFAULT_PIN);
+}
+function changePin(){
+  const v=(document.getElementById('newPin').value||'').trim();
+  if(v.length<3){document.getElementById('pinStatus').textContent='Минимум 3 символа';return;}
+  localStorage.setItem(PIN_KEY,v);
+  document.getElementById('newPin').value='';
+  document.getElementById('pinStatus').textContent='Пароль сохранён ✓';
+}
+
+function getName(){
+  return (document.getElementById('stuName').value||'').trim();
+}
+function requireName(){
+  const n=getName();
+  if(!n){alert('Введите имя и фамилию — так результат сохранится.');document.getElementById('stuName').focus();return null;}
+  return n;
+}
+
+function normArt(v){
+  v=(v||'').trim().toLowerCase();
+  if(v===''||v==='-'||v==='—'||v==='–'||v==='no'||v==='none'||v==='0'||v==='zero') return '—';
+  return v;
+}
+
+/* ---- CHOICE ---- */
+const CHOICE=[
+  {q:"I need ___ umbrella. It's raining.",o:['an','a','the','—'],a:0,c:'umbrella → гласный звук → an'},
+  {q:'She is ___ university student.',o:['a','an','the','—'],a:0,c:'university → /j/ → a'},
+  {q:'___ sun rises in the east.',o:['The','A','An','—'],a:0,c:'уникальный объект → the'},
+  {q:'I saw ___ cat. ___ cat was black.',o:['a / The','the / A','an / The','a / A'],a:0,c:'первый раз a, повтор the'},
+  {q:'He plays ___ piano every day.',o:['the','a','an','—'],a:0,c:'инструмент → the'},
+  {q:'We had ___ breakfast at 8.',o:['—','a','an','the'],a:0,c:'приём пищи → без артикля'},
+  {q:'___ Nile is the longest river in Africa.',o:['The','A','An','—'],a:0,c:'реки → the'},
+  {q:'She speaks ___ Spanish fluently.',o:['—','a','an','the'],a:0,c:'языки → без'},
+  {q:"This is ___ best film I've ever seen.",o:['the','a','an','—'],a:0,c:'превосходная → the'},
+  {q:'He went to ___ hospital to visit his friend.',o:['the','a','an','—'],a:0,c:'гость → the hospital'},
+  {q:'She is in ___ hospital after the operation.',o:['—','the','a','an'],a:0,c:'пациент → in hospital'},
+  {q:'I waited for ___ hour.',o:['an','a','the','—'],a:0,c:'hour → an'},
+  {q:'___ Alps are beautiful in winter.',o:['The','A','An','—'],a:0,c:'горные цепи → the'},
+  {q:'My brother is ___ engineer.',o:['an','a','the','—'],a:0,c:'профессия → an'},
+  {q:'We live in ___ Poland.',o:['—','a','an','the'],a:0,c:'страна → без'},
+  {q:"I'm going to ___ school now (I'm a student).",o:['—','the','a','an'],a:0,c:'ученик → to school'},
+];
+let choiceAns={};
+function shuffleOpts(item){
+  const c=item.o[item.a]; const o=item.o.slice();
+  for(let i=o.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[o[i],o[j]]=[o[j],o[i]];}
+  return {o,a:o.indexOf(c)};
+}
+function renderChoice(){
+  choiceAns={};
+  document.getElementById('choiceBox').innerHTML=CHOICE.map((it,i)=>{
+    const sh=shuffleOpts(it); it._sh=sh;
+    return `<div class="card" style="margin-bottom:8px"><div class="q">${i+1}. ${it.q}</div>
+      <div class="opts" id="ch${i}">${sh.o.map((x,j)=>`<button type="button" class="opt" onclick="pickChoice(${i},${j})">${x==='—'?'— (нет)':x}</button>`).join('')}</div>
+      <div class="fb" id="chfb${i}"></div></div>`;
+  }).join('');
+  document.getElementById('choiceScore').textContent='';
+  document.getElementById('choiceSend').textContent='';
+}
+function pickChoice(i,j){choiceAns[i]=j;document.querySelectorAll('#ch'+i+' .opt').forEach((b,k)=>b.style.borderColor=k===j?'var(--p)':'');}
+function checkChoice(){
+  const name=requireName(); if(!name) return;
+  let ok=0; const details=[];
+  CHOICE.forEach((it,i)=>{
+    const sh=it._sh, ans=choiceAns[i], fb=document.getElementById('chfb'+i);
+    const btns=document.querySelectorAll('#ch'+i+' .opt');
+    btns.forEach(b=>b.classList.add('dis'));
+    const given=ans!=null?sh.o[ans]:'(нет ответа)';
+    const right=sh.o[sh.a];
+    const isOk=ans===sh.a;
+    if(isOk){ok++;btns[ans]?.classList.add('ok');fb.className='fb ok';fb.textContent='✓ '+it.c;}
+    else{if(ans!=null)btns[ans]?.classList.add('bad');btns[sh.a]?.classList.add('ok');fb.className='fb bad';fb.textContent='✗ '+it.c;}
+    details.push({n:i+1,q:it.q,given,right,ok:isOk,c:it.c});
+  });
+  const pct=Math.round(100*ok/CHOICE.length);
+  document.getElementById('choiceScore').textContent=ok+' / '+CHOICE.length+' ('+pct+'%)';
+  persistAndSend({section:'choice',name,correct:ok,total:CHOICE.length,pct,details},'choiceSend');
+}
+function resetChoice(){renderChoice();}
+
+/* ---- FILL ---- */
+const FILL=[
+  {q:'There is ___ apple on the table.',a:['an'],c:'гласный звук'},
+  {q:'___ Earth goes around ___ sun.',a:['the','the'],c:'уникальные объекты'},
+  {q:'She is ___ honest person.',a:['an'],c:'немой h'},
+  {q:'I go to ___ work by bus.',a:['—'],c:'to work — без'},
+  {q:'This is ___ only solution.',a:['the'],c:'only → the'},
+  {q:'They visited ___ United Kingdom last year.',a:['the'],c:'UK → the'},
+  {q:'___ water is important for life.',a:['—'],c:'неисчисляемое в общем'},
+  {q:'He bought ___ new car yesterday.',a:['a'],c:'первый раз'},
+  {q:"Open ___ window, please.",a:['the'],c:'конкретное окно'},
+  {q:'My sister plays ___ tennis.',a:['—'],c:'спорт → без'},
+  {q:'We stayed at ___ hotel near the station.',a:['a'],c:'один из отелей'},
+  {q:'___ same problem happened again.',a:['the'],c:'same → the'},
+];
+function renderFill(){
+  document.getElementById('fillBox').innerHTML=FILL.map((it,i)=>{
+    const parts=it.q.split('___');
+    let html=`<div class="card" style="margin-bottom:8px"><div class="q">${i+1}. `;
+    parts.forEach((p,j)=>{html+=p;if(j<parts.length-1)html+=`<input id="fi${i}_${j}" type="text" autocomplete="off" placeholder="a/an/the/—">`;});
+    return html+`</div><div class="fb" id="fifb${i}"></div></div>`;
+  }).join('');
+  document.getElementById('fillScore').textContent='';
+  document.getElementById('fillSend').textContent='';
+}
+function checkFill(){
+  const name=requireName(); if(!name) return;
+  let ok=0,total=0; const details=[];
+  FILL.forEach((it,i)=>{
+    const n=it.q.split('___').length-1; let itemOk=true;
+    const givenParts=[], rightParts=[];
+    for(let j=0;j<n;j++){
+      total++;
+      const inp=document.getElementById('fi'+i+'_'+j);
+      const val=normArt(inp.value), right=normArt(it.a[j]);
+      givenParts.push(val||'(пусто)'); rightParts.push(right);
+      if(val===right){ok++;inp.className='ok';} else{itemOk=false;inp.className='bad';}
+    }
+    const fb=document.getElementById('fifb'+i);
+    fb.className='fb '+(itemOk?'ok':'bad'); fb.textContent=(itemOk?'✓ ':'✗ ')+it.c;
+    details.push({n:i+1,q:it.q,given:givenParts.join(' / '),right:rightParts.join(' / '),ok:itemOk,c:it.c});
+  });
+  const pct=Math.round(100*ok/total);
+  document.getElementById('fillScore').textContent=ok+' / '+total+' ('+pct+'%)';
+  persistAndSend({section:'fill',name,correct:ok,total,pct,details},'fillSend');
+}
+function resetFill(){renderFill();}
+
+/* ---- FIX ---- */
+const FIX=[
+  {q:'Выбери правильное:',o:['She is a doctor.','She is the doctor.','She is doctor.'],a:0,c:'профессия → a/an'},
+  {q:'Выбери правильное:',o:['I love music.','I love the music.','I love a music.'],a:0,c:'в общем → без'},
+  {q:'Выбери правильное:',o:['Mount Everest is in the Himalayas.','The Mount Everest is in Himalayas.','Mount Everest is in Himalayas.'],a:0,c:'гора без the; цепь — the'},
+  {q:'Выбери правильное:',o:['He is at home.','He is at the home.','He is in home.'],a:0,c:'at home'},
+  {q:'Выбери правильное:',o:['An hour ago I called you.','A hour ago I called you.','The hour ago I called you.'],a:0,c:'hour → an'},
+  {q:'Выбери правильное:',o:['The Pacific Ocean is huge.','Pacific Ocean is huge.','A Pacific Ocean is huge.'],a:0,c:'океаны → the'},
+  {q:'Выбери правильное:',o:['She goes to school by bus.','She goes to the school by bus.','She goes to a school by bus.'],a:0,c:'ученица → to school'},
+  {q:'Выбери правильное:',o:['This is the worst day of my life.','This is a worst day of my life.','This is worst day of my life.'],a:0,c:'превосходная → the'},
+];
+let fixAns={};
+function renderFix(){
+  fixAns={};
+  document.getElementById('fixBox').innerHTML=FIX.map((it,i)=>{
+    const c=it.o[it.a], o=it.o.slice();
+    for(let k=o.length-1;k>0;k--){const j=Math.floor(Math.random()*(k+1));[o[k],o[j]]=[o[j],o[k]];}
+    it._o=o; it._a=o.indexOf(c);
+    return `<div class="card" style="margin-bottom:8px"><div class="q">${i+1}. ${it.q}</div>
+      <div class="opts" id="fx${i}">${o.map((x,j)=>`<button type="button" class="opt" onclick="pickFix(${i},${j})">${x}</button>`).join('')}</div>
+      <div class="fb" id="fxfb${i}"></div></div>`;
+  }).join('');
+  document.getElementById('fixScore').textContent='';
+  document.getElementById('fixSend').textContent='';
+}
+function pickFix(i,j){fixAns[i]=j;document.querySelectorAll('#fx'+i+' .opt').forEach((b,k)=>b.style.borderColor=k===j?'var(--p)':'');}
+function checkFix(){
+  const name=requireName(); if(!name) return;
+  let ok=0; const details=[];
+  FIX.forEach((it,i)=>{
+    const ans=fixAns[i], btns=document.querySelectorAll('#fx'+i+' .opt'), fb=document.getElementById('fxfb'+i);
+    btns.forEach(b=>b.classList.add('dis'));
+    const given=ans!=null?it._o[ans]:'(нет ответа)';
+    const right=it._o[it._a];
+    const isOk=ans===it._a;
+    if(isOk){ok++;btns[ans]?.classList.add('ok');fb.className='fb ok';fb.textContent='✓ '+it.c;}
+    else{if(ans!=null)btns[ans]?.classList.add('bad');btns[it._a]?.classList.add('ok');fb.className='fb bad';fb.textContent='✗ '+it.c;}
+    details.push({n:i+1,q:it.q,given,right,ok:isOk,c:it.c});
+  });
+  const pct=Math.round(100*ok/FIX.length);
+  document.getElementById('fixScore').textContent=ok+' / '+FIX.length+' ('+pct+'%)';
+  persistAndSend({section:'fix',name,correct:ok,total:FIX.length,pct,details},'fixSend');
+}
+function resetFix(){renderFix();}
+
+/* ---- CLOZE ---- */
+const CLOZE={
+  text:`Last summer I went to (1)___ Italy with (2)___ friend. We stayed in (3)___ small hotel near (4)___ sea. Every morning we had (5)___ breakfast on (6)___ balcony. (7)___ weather was perfect. One day we visited (8)___ Colosseum in Rome — it was (9)___ most amazing place I had ever seen. In (10)___ evening we listened to (11)___ music in (12)___ park.`,
+  answers:['—','a','a','the','—','the','The','the','the','the','—','the']
+};
+function renderCloze(){
+  let html=CLOZE.text;
+  for(let i=1;i<=12;i++) html=html.replace('('+i+')___',' <input id="cl'+i+'" type="text" placeholder="'+i+'" autocomplete="off"> ');
+  document.getElementById('clozeBox').innerHTML='<p>'+html+'</p>';
+  document.getElementById('clozeScore').textContent='';
+  document.getElementById('clozeSend').textContent='';
+}
+function checkCloze(){
+  const name=requireName(); if(!name) return;
+  let ok=0; const details=[];
+  CLOZE.answers.forEach((right,idx)=>{
+    const inp=document.getElementById('cl'+(idx+1));
+    const given=normArt(inp.value)||'(пусто)';
+    const r=normArt(right);
+    const isOk=given===r;
+    if(isOk){ok++;inp.className='ok';} else inp.className='bad';
+    details.push({n:idx+1,q:'gap '+(idx+1)+' in cloze',given,right:r,ok:isOk,c:''});
+  });
+  const pct=Math.round(100*ok/CLOZE.answers.length);
+  document.getElementById('clozeScore').textContent=ok+' / '+CLOZE.answers.length+' ('+pct+'%)';
+  persistAndSend({section:'cloze',name,correct:ok,total:CLOZE.answers.length,pct,details},'clozeSend');
+}
+function resetCloze(){renderCloze();}
+
+/* ---- MIX ---- */
+const MIX=[
+  {type:'mcq',q:'___ useful advice can change your life.',o:['—','A','An','The'],a:0,c:'advice в общем → без'},
+  {type:'mcq',q:'She has ___ MBA from Harvard.',o:['an','a','the','—'],a:0,c:'MBA → /em/ → an'},
+  {type:'gap',q:'I need to go to ___ bank. ___ bank on Green Street is closed.',a:['the','The'],c:'конкретный + повтор'},
+  {type:'mcq',q:'They crossed ___ Atlantic by ship.',o:['the','a','an','—'],a:0,c:'океан → the'},
+  {type:'gap',q:'___ information you gave me was wrong.',a:['The'],c:'конкретная информация'},
+  {type:'mcq',q:'He was sent to ___ prison for five years.',o:['—','the','a','an'],a:0,c:'заключённый → to prison'},
+  {type:'gap',q:'What ___ beautiful day!',a:['a'],c:'What a + countable'},
+  {type:'gap',q:'She is ___ tallest girl in ___ class.',a:['the','the'],c:'превосходная + класс'},
+  {type:'mcq',q:'I watched ___ CNN this morning.',o:['—','the','a','an'],a:0,c:'канал/бренд часто без'},
+  {type:'mcq',q:'___ lunch is ready!',o:['—','The','A','An'],a:0,c:'приём пищи → часто без'},
+];
+let mixAns={};
+function renderMix(){
+  mixAns={};
+  document.getElementById('mixBox').innerHTML=MIX.map((it,i)=>{
+    if(it.type==='mcq'){
+      const c=it.o[it.a], o=it.o.slice();
+      for(let k=o.length-1;k>0;k--){const j=Math.floor(Math.random()*(k+1));[o[k],o[j]]=[o[j],o[k]];}
+      it._o=o; it._a=o.indexOf(c);
+      return `<div class="card" style="margin-bottom:8px"><div class="q">${i+1}. ${it.q}</div>
+        <div class="opts" id="mx${i}">${o.map((x,j)=>`<button type="button" class="opt" onclick="pickMix(${i},${j})">${x==='—'?'— (нет)':x}</button>`).join('')}</div>
+        <div class="fb" id="mxfb${i}"></div></div>`;
+    }
+    const parts=it.q.split('___'); let html=`<div class="card" style="margin-bottom:8px"><div class="q">${i+1}. `;
+    parts.forEach((p,j)=>{html+=p;if(j<parts.length-1)html+=`<input id="mxi${i}_${j}" type="text" autocomplete="off" placeholder="a/an/the/—">`;});
+    return html+`</div><div class="fb" id="mxfb${i}"></div></div>`;
+  }).join('');
+  document.getElementById('mixScore').textContent='';
+  document.getElementById('mixSend').textContent='';
+}
+function pickMix(i,j){mixAns[i]=j;document.querySelectorAll('#mx'+i+' .opt').forEach((b,k)=>b.style.borderColor=k===j?'var(--p)':'');}
+function checkMix(){
+  const name=requireName(); if(!name) return;
+  let ok=0,total=0; const details=[];
+  MIX.forEach((it,i)=>{
+    const fb=document.getElementById('mxfb'+i);
+    if(it.type==='mcq'){
+      total++; const ans=mixAns[i], btns=document.querySelectorAll('#mx'+i+' .opt');
+      btns.forEach(b=>b.classList.add('dis'));
+      const given=ans!=null?it._o[ans]:'(нет ответа)';
+      const right=it._o[it._a];
+      const isOk=ans===it._a;
+      if(isOk){ok++;btns[ans]?.classList.add('ok');fb.className='fb ok';fb.textContent='✓ '+it.c;}
+      else{if(ans!=null)btns[ans]?.classList.add('bad');btns[it._a]?.classList.add('ok');fb.className='fb bad';fb.textContent='✗ '+it.c;}
+      details.push({n:i+1,q:it.q,given,right,ok:isOk,c:it.c});
+    } else {
+      const n=it.q.split('___').length-1; let itemOk=true;
+      const givenParts=[], rightParts=[];
+      for(let j=0;j<n;j++){
+        total++; const inp=document.getElementById('mxi'+i+'_'+j);
+        const val=normArt(inp.value), right=normArt(it.a[j]);
+        givenParts.push(val||'(пусто)'); rightParts.push(right);
+        if(val===right){ok++;inp.className='ok';} else{itemOk=false;inp.className='bad';}
+      }
+      fb.className='fb '+(itemOk?'ok':'bad'); fb.textContent=(itemOk?'✓ ':'✗ ')+it.c;
+      details.push({n:i+1,q:it.q,given:givenParts.join(' / '),right:rightParts.join(' / '),ok:itemOk,c:it.c});
+    }
+  });
+  const pct=Math.round(100*ok/total);
+  document.getElementById('mixScore').textContent=ok+' / '+total+' ('+pct+'%)';
+  persistAndSend({section:'mix',name,correct:ok,total,pct,details},'mixSend');
+}
+function resetMix(){renderMix();}
+
+/* ---- SAVE / CLOUD ---- */
+function loadAll(){try{return JSON.parse(localStorage.getItem(STORE)||'[]');}catch(e){return[];}}
+function persistAndSend(result, statusId){
+  result.id=Date.now()+'_'+Math.random().toString(36).slice(2,7);
+  result.date=new Date().toISOString();
+  result.dateLocal=new Date().toLocaleString('ru-RU');
+  result.topic='articles';
+  const all=loadAll();
+  all.push(result);
+  localStorage.setItem(STORE, JSON.stringify(all.slice(-200)));
+  updateProg();
+  sendToCloud(result, statusId);
+}
+function updateProg(){
+  const all=loadAll();
+  const el=document.getElementById('progSummary');
+  if(!all.length){el.textContent='ещё нет попыток';return;}
+  const last=all[all.length-1];
+  el.textContent=`${all.length} записей · последняя: ${last.name} · ${last.section} ${last.pct}% (${last.dateLocal})`;
+}
+async function sendToCloud(result, statusId){
+  const url=(localStorage.getItem(WEBHOOK_KEY)||'').trim();
+  const statusEl=statusId?document.getElementById(statusId):null;
+  if(!url){
+    if(statusEl) statusEl.innerHTML='💾 Сохранено локально (с ответами). <span class="send-err">Webhook не задан — в кабинете.</span>';
+    return;
+  }
+  if(statusEl) statusEl.textContent='⏳ Отправка в облако…';
+  try{
+    await fetch(url,{
+      method:'POST',
+      mode:'no-cors',
+      headers:{'Content-Type':'text/plain'},
+      body:JSON.stringify({
+        name:result.name,
+        section:result.section,
+        topic:result.topic||'articles',
+        correct:result.correct,
+        total:result.total,
+        pct:result.pct,
+        date:result.date,
+        dateLocal:result.dateLocal,
+        details:result.details||[]
+      })
+    });
+    if(statusEl) statusEl.innerHTML='💾 Локально ✓ · <span class="send-ok">Облако: отправлено (с ответами)</span>';
+  }catch(e){
+    if(statusEl) statusEl.innerHTML='💾 Локально ✓ · <span class="send-err">Облако: ошибка</span>';
+  }
+}
+function getWebhook(){return (localStorage.getItem(WEBHOOK_KEY)||'').trim();}
+function saveWebhook(){
+  const v=(document.getElementById('webhookUrl').value||'').trim();
+  localStorage.setItem(WEBHOOK_KEY,v);
+  document.getElementById('webhookStatus').textContent=v?'Webhook сохранён ✓':'Очищено';
+}
+function showTeacher(){
+  const entered=prompt('Пароль кабинета преподавателя:');
+  if(entered===null) return;
+  if(entered!==getPin()){
+    alert('Неверный пароль');
+    return;
+  }
+  document.getElementById('mainApp').classList.add('hidden');
+  document.getElementById('teacherScreen').classList.remove('hidden');
+  window.scrollTo(0,0);
+  document.getElementById('webhookUrl').value=getWebhook();
+  document.getElementById('webhookStatus').textContent=getWebhook()?'Webhook задан':'Webhook не задан';
+  const pinSt=document.getElementById('pinStatus');
+  if(pinSt) pinSt.textContent='';
+  renderTeacherList();
+}
+function formatDetailRow(d){
+  const mark=d.ok?'✓':'✗';
+  const color=d.ok?'var(--s)':'var(--e)';
+  return '<div style="padding:6px 0;border-bottom:1px solid var(--b);font-size:.78rem">'+
+    '<b style="color:'+color+'">'+mark+' №'+d.n+'</b> '+escapeHtml(d.q||'')+
+    '<br>ответ: <b>'+escapeHtml(String(d.given))+'</b>'+
+    (d.ok?'':' · верно: <b style="color:var(--s)">'+escapeHtml(String(d.right))+'</b>')+
+    (d.c?' · <i>'+escapeHtml(d.c)+'</i>':'')+
+    '</div>';
+}
+function renderTeacherList(){
+  const all=loadAll().slice().reverse();
+  const box=document.getElementById('teacherList');
+  if(!all.length){box.innerHTML='<p class="hint">Нет сдач в этом браузере.</p>';return;}
+  box.innerHTML='<p class="hint" style="margin-bottom:8px">Нажми <b>«Показать ошибки»</b> или <b>«Все ответы»</b> у нужной сдачи.</p>'+all.map((r,idx)=>{
+    const dets=r.details||[];
+    const errs=dets.filter(d=>!d.ok);
+    const errHtml=errs.length
+      ? '<div style="margin-top:8px;padding:8px;background:var(--bg);border-radius:8px">'+errs.map(formatDetailRow).join('')+'</div>'
+      : (dets.length
+          ? '<p class="hint" style="margin-top:8px">Ошибок нет ✓</p>'
+          : '<p class="hint" style="margin-top:8px">Детализация не сохранена (старая попытка). Пройди раздел ещё раз после обновления.</p>');
+    const allHtml=dets.length
+      ? '<div style="margin-top:8px;padding:8px;background:var(--bg);border-radius:8px">'+dets.map(formatDetailRow).join('')+'</div>'
+      : '<p class="hint" style="margin-top:8px">Нет детализации (старая запись)</p>';
+    return `<div class="card" style="margin-bottom:10px;padding:12px">
+      <div style="margin-bottom:8px">
+        <b>${escapeHtml(r.name)}</b> · ${r.section} · <b>${r.pct}%</b> (${r.correct}/${r.total})
+        · ошибок: <b style="color:${errs.length?'var(--e)':'var(--s)'}">${errs.length}</b>
+        <br><span class="hint">${r.dateLocal||''}</span>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button type="button" class="btn" style="margin:0;flex:1;min-width:140px" onclick="toggleDetail('te${idx}',this)">▶ Показать ошибки (${errs.length})</button>
+        <button type="button" class="btn sec" style="margin:0;flex:1;min-width:140px" onclick="toggleDetail('ta${idx}',this)">▶ Все ответы</button>
+      </div>
+      <div id="te${idx}" class="hidden">${errHtml}</div>
+      <div id="ta${idx}" class="hidden">${allHtml}</div>
+    </div>`;
+  }).join('');
+}
+function toggleDetail(id, btn){
+  const el=document.getElementById(id);
+  if(!el) return;
+  const open=el.classList.contains('hidden');
+  el.classList.toggle('hidden');
+  if(btn){
+    const base=btn.textContent.replace(/^[▼▶]\s*/,'');
+    btn.textContent=(open?'▼ ':'▶ ')+base.replace(/^(Показать |Скрыть )/,'');
+    if(open) btn.textContent=btn.textContent.replace('Показать ','Скрыть ');
+    else btn.textContent=btn.textContent.replace('Скрыть ','Показать ');
+  }
+}
+function hideTeacher(){
+  document.getElementById('teacherScreen').classList.add('hidden');
+  document.getElementById('mainApp').classList.remove('hidden');
+  window.scrollTo(0,0);
+}
+function clearAll(){if(!confirm('Удалить все локальные результаты?'))return; localStorage.removeItem(STORE); updateProg(); showTeacher();}
+function exportAllJSON(){
+  const blob=new Blob([JSON.stringify(loadAll(),null,2)],{type:'application/json'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='articles_results.json'; a.click();
+}
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
+function go(id){
+  document.querySelectorAll('.sec').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.t===id));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+}
+
+renderChoice(); renderFill(); renderFix(); renderCloze(); renderMix(); updateProg();
+</script>
+</body>
+</html>
