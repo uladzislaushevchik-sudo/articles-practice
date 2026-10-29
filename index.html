@@ -9,6 +9,7 @@ body{font-family:system-ui,sans-serif;display:flex;align-items:center;justify-co
 .box{text-align:center;padding:24px}
 .spin{width:36px;height:36px;border:3px solid #ddd5e8;border-top-color:#4A148C;border-radius:50%;animation:s .8s linear infinite;margin:0 auto 12px}
 @keyframes s{to{transform:rotate(360deg)}}
+a{color:#4A148C}
 </style>
 </head>
 <body>
@@ -19,8 +20,8 @@ body{font-family:system-ui,sans-serif;display:flex;align-items:center;justify-co
   try {
     const parts = [];
     for (let i = 0; i < n; i++) {
-      const r = await fetch('p' + i + '.txt?v=3');
-      if (!r.ok) throw new Error('chunk p' + i + ' ' + r.status);
+      const r = await fetch('ap' + i + '.txt?v=3');
+      if (!r.ok) throw new Error('chunk ap' + i + ' ' + r.status);
       parts.push((await r.text()).trim());
     }
     const b64 = parts.join('');
@@ -34,7 +35,7 @@ body{font-family:system-ui,sans-serif;display:flex;align-items:center;justify-co
     document.write(html);
     document.close();
   } catch (e) {
-    document.getElementById('msg').innerHTML = 'Ошибка загрузки. <a href="https://github.com/uladzislaushevchik-sudo/articles-practice/upload/main">Загрузите Articles_Practice.html как articles.html</a><br>' + e;
+    document.getElementById('msg').innerHTML = 'Ошибка. <a href="https://github.com/uladzislaushevchik-sudo/articles-practice/upload/main">Загрузите Articles_Practice.html как articles.html</a><br>' + e;
   }
 })();
 </script>
